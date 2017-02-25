@@ -4,7 +4,6 @@ import urllib.request
 import re
 import warnings
 
-import click
 from bs4 import BeautifulSoup as bs
 
 from holcrawl.shared import _get_wiki_list_file_path
@@ -33,19 +32,21 @@ class _NewExtractor(object):
         return titles
 
     @staticmethod
-    def _extract_titles_from_wiki_page(wiki_url):
+    def _extract_titles_from_wiki_page(wiki_url, verbose):
         wiki_page = bs(urllib.request.urlopen(wiki_url), "html.parser")
         movies_tables = wiki_page.find_all('table', {'class': 'wikitable'})
         titles = []
         for table in movies_tables:
-            print("Extracting a table...")
+            if verbose:
+                print("Extracting a table...")
             titles += _NewExtractor._extract_titles(table)
         titles = [title for title in titles if title != "Title"]
-        print('{} titles collected.'.format(len(titles)))
+        if verbose:
+            print('{} titles collected.'.format(len(titles)))
         return titles
 
 
-# good for pages from before 2014
+# good for pages from 1999 to 2013
 class _OldExtractor(object):
 
     MIRROR_REGEX = r"([\w\s]+):\1"
@@ -63,7 +64,7 @@ class _OldExtractor(object):
         return title.strip()
 
     @staticmethod
-    def _extract_titles_from_wiki_page(wiki_url):
+    def _extract_titles_from_wiki_page(wiki_url, verbose):
         wiki_page = bs(urllib.request.urlopen(wiki_url), "html.parser")
         table = wiki_page.find_all('table', {'class': 'wikitable'})[0]
         rows = table.find_all('tr')
@@ -74,6 +75,8 @@ class _OldExtractor(object):
                     row.find_all(["td"])[0].get_text()))
             except IndexError:
                 pass
+        if verbose:
+            print('{} titles collected.'.format(len(titles)))
         return titles
 
 
@@ -81,18 +84,17 @@ FIRST_YEAR_FOR_NEW_EXTRACTOR = 2014
 FIRST_YEAR_FOR_2000S_EXTRACTOR = 1999
 URL_TEMPLATE = 'https://en.wikipedia.org/wiki/List_of_American_films_of_{}'
 
-@click.command()
-@click.argument("year", type=int, nargs=1)
-def generate_title_file(year):
+def generate_title_file(year, verbose):
     """Generate movie title files from Wikipedia."""
-    print("Generate movie title files from Wikipedia for year {}...".format(
-        year))
+    if verbose:
+        print("Generate movie title files from Wikipedia for {}...".format(
+            year))
     if year >= FIRST_YEAR_FOR_NEW_EXTRACTOR:
         titles = _NewExtractor._extract_titles_from_wiki_page(
-            URL_TEMPLATE.format(year))
+            URL_TEMPLATE.format(year), verbose)
     elif year >= FIRST_YEAR_FOR_2000S_EXTRACTOR:
         titles = _OldExtractor._extract_titles_from_wiki_page(
-            URL_TEMPLATE.format(year))
+            URL_TEMPLATE.format(year), verbose)
     else:
         warnings.warn("Wikipedia crawling not supported for years before {}."
                       " Terminating.".format(FIRST_YEAR_FOR_2000S_EXTRACTOR))

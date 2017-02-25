@@ -3,13 +3,13 @@
 import os
 import holcrawl
 
-import click
+
+def crawl_all_by_title(title, verbose):
+    """Crawls all sources and builds profiles for the given title."""
+    holcrawl.imdb_crawl.crawl_by_title(title, verbose)
+    holcrawl.metacritic_crawl.crawl_by_title(title, verbose)
 
 
-@click.command()
-@click.argument("file_path", type=str, nargs=1)
-@click.option("-v", "--verbose", is_flag=True,
-              help="Print information to screen.")
 def crawl_all_by_file(file_path, verbose):
     """Crawls all sources and builds profiles for titles in the given file."""
     holcrawl.imdb_crawl.crawl_by_file(file_path, verbose)
@@ -26,28 +26,16 @@ def _crawl_by_year_helper(year, verbose, imdb, metacritic):
         holcrawl.metacritic_crawl.crawl_by_file(filepath, verbose)
 
 
-@click.command()
-@click.argument("year", type=int, nargs=1)
-@click.option("-v", "--verbose", is_flag=True, default=False,
-              help="Print information to screen.")
 def imdb_crawl_by_year(year, verbose):
     """Crawls IMDB and builds movie profiles for the given year."""
     _crawl_by_year_helper(year, verbose, True, False)
 
 
-@click.command()
-@click.argument("year", type=int, nargs=1)
-@click.option("-v", "--verbose", is_flag=True, default=False,
-              help="Print information to screen.")
 def metacritic_crawl_by_year(year, verbose):
     """Crawls Metacritic and builds movie profiles for the given year."""
     _crawl_by_year_helper(year, verbose, False, True)
 
 
-@click.command()
-@click.argument("year", type=int, nargs=1)
-@click.option("-v", "--verbose", is_flag=True, default=False,
-              help="Print information to screen.")
 def crawl_all_by_year(year, verbose):
     """Crawls all sources and builds movie profiles for the given year."""
     _crawl_by_year_helper(year, verbose, True, True)

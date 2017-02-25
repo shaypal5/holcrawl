@@ -3,7 +3,7 @@
 import click
 
 _SHARED_OPTIONS = [
-    click.option('--verbose/--silent', default=False,
+    click.option('--verbose/--silent', default=True,
                  help="Turn printing progress to screen on or off.")
 ]
 

@@ -36,21 +36,7 @@ setup(
     ''',
     # entry_points='''
     #     [console_scripts]
-
-    #     holcrawl clear=holcrawl.shared:clear_empty_profiles
-    #     holcrawl crawl byfile=holcrawl.compound_cmd:crawl_all_by_file
-    #     holcrawl crawl byyear=holcrawl.compound_cmd:crawl_all_by_year
-
-    #     holcrawl imdb byname=holcrawl.imdb_crawl:save_cli
-    #     holcrawl imdb byfile=holcrawl.imdb_crawl:crawl_by_file
-    #     holcrawl imdb byyear=holcrawl.compound_cmd:imdb_crawl_by_year
     #     holcrawl unite=holcrawl.imdb_crawl:unite_imdb_profiles
-
-    #     holcrawl meta byname=holcrawl.metacritic_crawl:save_cli
-    #     holcrawl meta byfile=holcrawl.metacritic_crawl:crawl_by_file
-    #     holcrawl meta byyear=holcrawl.compound_cmd:metacritic_crawl_by_year
-
-    #     holcrawl wiki titles=holcrawl.wiki_crawl:generate_title_files
     # ''',
     install_requires=[
         'beautifulsoup4', 'click', 'tqdm', 'morejson'

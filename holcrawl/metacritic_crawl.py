@@ -7,11 +7,9 @@ import urllib
 import urllib.request
 from datetime import datetime
 
-import click
 from bs4 import BeautifulSoup as bs
 from tqdm import tqdm
 import morejson as json
-
 
 from holcrawl.shared import (
     _get_metacritic_dir_path,
@@ -187,7 +185,7 @@ def get_metacritic_movie_properties(movie_name):
     return movie_props
 
 
-def save_metacrictic_movie_profile(movie_name, verbose, parent_pbar=None):
+def crawl_by_title(movie_name, verbose, parent_pbar=None):
     """Extracts a movie profile from Metacritic and saves it to disk."""
     def _print(msg):
         if verbose:
@@ -219,19 +217,6 @@ def save_metacrictic_movie_profile(movie_name, verbose, parent_pbar=None):
         # raise exc
 
 
-@click.command()
-@click.argument("movie_name", type=str, nargs=1)
-@click.option("-v", "--verbose", is_flag=True,
-              help="Print information to screen.")
-def save_cli(movie_name, verbose):
-    """Extracts a movie profile from IMDB and saves it to disk."""
-    save_metacrictic_movie_profile(movie_name, verbose)
-
-
-@click.command()
-@click.argument("file_path", type=str, nargs=1)
-@click.option("-v", "--verbose", is_flag=True,
-              help="Print information to screen.")
 def crawl_by_file(file_path, verbose=False):
     """Crawls Metacritics, building movie profiles for a movies in the given
     file."""
@@ -243,7 +228,7 @@ def crawl_by_file(file_path, verbose=False):
     movie_pbar = tqdm(titles, miniters=1, maxinterval=0.0001,
                       mininterval=0.00000000001, total=len(titles))
     for title in movie_pbar:
-        res = save_metacrictic_movie_profile(title, verbose, movie_pbar)
+        res = crawl_by_title(title, verbose, movie_pbar)
         results[res] += 1
     print("{} Metacritic movie profiles crawled.")
     for res_type in _result.ALL_TYPES:

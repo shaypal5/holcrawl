@@ -9,11 +9,10 @@ import urllib
 import traceback
 
 from bs4 import BeautifulSoup as bs
-import click
 from tqdm import tqdm
 import pandas as pd
-
 import morejson as json
+
 from holcrawl.shared import (
     _get_imdb_dir_path,
     _titles_from_file,
@@ -304,7 +303,7 @@ def crawl_movie_profile(movie_name):
 
 # ==== interface ====
 
-def save_movie_profile(movie_name, verbose, parent_pbar=None):
+def crawl_by_title(movie_name, verbose, parent_pbar=None):
     """Extracts a movie profile from IMDB and saves it to disk."""
     def _print(msg):
         if verbose:
@@ -342,19 +341,6 @@ def save_movie_profile(movie_name, verbose, parent_pbar=None):
         # raise exc
 
 
-@click.command()
-@click.argument("movie_name", type=str, nargs=1)
-@click.option("-v", "--verbose", is_flag=True,
-              help="Print information to screen.")
-def save_cli(movie_name, verbose):
-    """Extracts a movie profile from IMDB and saves it to disk."""
-    save_movie_profile(movie_name, verbose)
-
-
-@click.command()
-@click.argument("file_path", type=str, nargs=1)
-@click.option("-v", "--verbose", is_flag=True, default=False,
-              help="Print information to screen.")
 def crawl_by_file(file_path, verbose):
     """Crawls IMDB and builds movie profiles for a movies in the given file."""
     results = {res_type : 0 for res_type in _result.ALL_TYPES}
@@ -365,7 +351,7 @@ def crawl_by_file(file_path, verbose):
     movie_pbar = tqdm(titles, miniters=1, maxinterval=0.0001,
                       mininterval=0.00000000001, total=len(titles))
     for title in movie_pbar:
-        res = save_movie_profile(title, verbose, movie_pbar)
+        res = crawl_by_title(title, verbose, movie_pbar)
         results[res] += 1
     print("{} IMDB movie profiles crawled.")
     for res_type in _result.ALL_TYPES:
@@ -418,14 +404,20 @@ def _dummy_list_column(df, colname):
     return _decompose_dict_column(df, colname, list(value_set))
 
 
-def unite_imdb_profiles():
-    """Unite all movie profiles in the profile directory."""
-    print("Uniting movie profiles unti one csv file...")
+def unite_imdb_profiles(verbose):
+    """Unite all movie profiles in the IMDB profile directory."""
+    if verbose:
+        print("Uniting IMDB movie profiles to one csv file...")
     if not os.path.exists(IMDB_DIR_PATH):
-        print("No profiles to unite!")
+        print("No IMDB profiles to unite!")
+        return
     profiles = []
-    for profile_file in os.listdir(IMDB_DIR_PATH):
-        print('Reading {}'.format(profile_file))
+    profile_files = os.listdir(IMDB_DIR_PATH)
+    if verbose:
+        profile_files = tqdm(profile_files)
+    for profile_file in profile_files:
+        if verbose:
+            profile_files.set_description('Reading {}'.format(profile_file))
         file_path = os.path.join(IMDB_DIR_PATH, profile_file)
         file_name, ext = os.path.splitext(file_path)
         if ext == '.json':

@@ -29,6 +29,11 @@ def _get_cfg():
         return {}
 
 
+def print_cfg():
+    """Prints the current configuration of holcrawl to screen."""
+    print(_get_cfg())
+
+
 class _CfgKey(object):
     DATADIR = 'data_dir'
 

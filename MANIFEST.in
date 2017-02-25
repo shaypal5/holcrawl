@@ -1,0 +1,3 @@
+include versioneer.py
+include hollywood_crawler/_version.py
+include holcrawl/_version.py

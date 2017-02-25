@@ -1,0 +1,4 @@
+beautifulsoup4>=4.5.1
+click>=6.7
+morejson>=1.0.7
+tqdm>=4.11

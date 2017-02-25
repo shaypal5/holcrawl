@@ -9,8 +9,7 @@ holcrawl
 
 
 .. contents::
-
-.. section-numbering:
+.. section-numbering::
 
 
 Installation

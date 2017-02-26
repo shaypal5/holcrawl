@@ -7,6 +7,7 @@ import holcrawl
 from .imdb_cli import imdb
 from .meta_cli import meta
 from .wiki_cli import wiki
+from .dataset_cli import dataset
 from .shared_options import _shared_options
 
 
@@ -62,3 +63,4 @@ def showcfg():
 cli.add_command(imdb)
 cli.add_command(meta)
 cli.add_command(wiki)
+cli.add_command(dataset)

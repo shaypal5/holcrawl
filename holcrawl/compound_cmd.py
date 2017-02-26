@@ -19,11 +19,11 @@ def crawl_all_by_file(file_path, verbose):
 def _crawl_by_year_helper(year, verbose, imdb, metacritic):
     filepath = holcrawl.shared._get_wiki_list_file_path(year)
     if not os.path.isfile(filepath):
-        holcrawl.wiki_crawl.generate_title_file(year)
+        holcrawl.wiki_crawl.generate_title_file(year, verbose)
     if imdb:
-        holcrawl.imdb_crawl.crawl_by_file(filepath, verbose)
+        holcrawl.imdb_crawl.crawl_by_file(filepath, verbose, year)
     if metacritic:
-        holcrawl.metacritic_crawl.crawl_by_file(filepath, verbose)
+        holcrawl.metacritic_crawl.crawl_by_file(filepath, verbose, year)
 
 
 def imdb_crawl_by_year(year, verbose):

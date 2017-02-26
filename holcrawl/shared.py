@@ -6,11 +6,11 @@ import json
 import warnings
 import functools
 
-HOMEDIR = os.path.expanduser("~")
-DEF_CFG_FILE_NAME = '.holcrawl_cfg.json'
-DEF_CFG_FILE_PATH = os.path.join(HOMEDIR, DEF_CFG_FILE_NAME)
-DEF_DATA_DIR_NAME = 'holcrawl_data'
-DEF_DATA_DIR_PATH = os.path.join(HOMEDIR, DEF_DATA_DIR_NAME)
+_HOMEDIR = os.path.expanduser("~")
+_DEF_CFG_FILE_NAME = '.holcrawl_cfg.json'
+_DEF_CFG_FILE_PATH = os.path.join(_HOMEDIR, _DEF_CFG_FILE_NAME)
+_DEF_DATA_DIR_NAME = 'holcrawl_data'
+_DEF_DATA_DIR_PATH = os.path.join(_HOMEDIR, _DEF_DATA_DIR_NAME)
 
 
 # === configuration ===
@@ -18,14 +18,14 @@ DEF_DATA_DIR_PATH = os.path.join(HOMEDIR, DEF_DATA_DIR_NAME)
 @functools.lru_cache(maxsize=2)
 def _get_cfg():
     try:
-        with open(DEF_CFG_FILE_PATH, 'r') as cfg_file:
+        with open(_DEF_CFG_FILE_PATH, 'r') as cfg_file:
             return json.load(cfg_file)
     except FileNotFoundError:
         return {}
     except Exception:  # pylint: disable=W0703
         warnings.warn(
             "Reading {} failed. Ignoring user configuration.".format(
-                DEF_CFG_FILE_NAME))
+                _DEF_CFG_FILE_NAME))
         return {}
 
 
@@ -42,7 +42,7 @@ def set_data_dir_path(dir_path):
     """Sets the a directory path as the path of holcrawl's data directory."""
     current_cfg = _get_cfg()
     current_cfg[_CfgKey.DATADIR] = dir_path
-    with open(DEF_CFG_FILE_PATH, 'w+') as cfg_file:
+    with open(_DEF_CFG_FILE_PATH, 'w+') as cfg_file:
         json.dump(current_cfg, cfg_file)
 
 
@@ -50,28 +50,41 @@ def _get_data_dir_path():
     try:
         return _get_cfg()[_CfgKey.DATADIR]
     except KeyError:
-        return DEF_DATA_DIR_PATH
+        return _DEF_DATA_DIR_PATH
 
 
-IMDB_PROF_DIR_NAME = 'imdb_profiles'
+_UNITED_PROF_DIR_NAME = 'united_profiles'
+
+def _get_united_dir_path():
+    return os.path.join(_get_data_dir_path(), _UNITED_PROF_DIR_NAME)
+
+
+_IMDB_PROF_DIR_NAME = 'imdb_profiles'
 
 def _get_imdb_dir_path():
-    return os.path.join(_get_data_dir_path(), IMDB_PROF_DIR_NAME)
+    return os.path.join(_get_data_dir_path(), _IMDB_PROF_DIR_NAME)
 
 
-WIKI_LISTS_DIR_NAME = 'wiki_lists'
+_WIKI_LISTS_DIR_NAME = 'wiki_lists'
 
 def _get_wiki_dir_path():
-    return os.path.join(_get_data_dir_path(), WIKI_LISTS_DIR_NAME)
+    return os.path.join(_get_data_dir_path(), _WIKI_LISTS_DIR_NAME)
+
 
 def _get_wiki_list_file_path(year):
     return os.path.join(_get_wiki_dir_path(), '{}_titles.txt'.format(year))
 
 
-METACRITIC_PROF_DIR_NAME = 'metacritic_profiles'
+_METACRITIC_PROF_DIR_NAME = 'metacritic_profiles'
 
 def _get_metacritic_dir_path():
-    return os.path.join(_get_data_dir_path(), METACRITIC_PROF_DIR_NAME)
+    return os.path.join(_get_data_dir_path(), _METACRITIC_PROF_DIR_NAME)
+
+
+_DATASET_DIR_NAME = 'datasets'
+
+def _get_dataset_dir_path():
+    return os.path.join(_get_data_dir_path(), _DATASET_DIR_NAME)
 
 
 # === utilities ===
@@ -112,8 +125,8 @@ def _parse_string(string):
     return string.lower().strip().replace(' ', '_')
 
 
-CHARS_TO_REMOVE = r"[\:\;,\.'/\!]"
+_CHARS_TO_REMOVE = r"[\:\;,\.'/\!]"
 
 def _parse_name_for_file_name(movie_name):
-    parsed = re.sub(CHARS_TO_REMOVE, '', movie_name)
+    parsed = re.sub(_CHARS_TO_REMOVE, '', movie_name)
     return parsed.replace(' ', '_').lower()

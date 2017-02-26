@@ -34,12 +34,23 @@ SEARCH_URL = ("http://www.metacritic.com/search/all/{movie_name}/results?"
 _HEADERS = {'User-Agent': 'Mozilla/5.0'}
 METACRITIC_URL = "http://www.metacritic.com"
 
-def _get_movie_url_by_name(movie_name):
+def _get_movie_url_by_name(movie_name, year=None):
     query = SEARCH_URL.format(movie_name=_parse_name_for_search(movie_name))
     request = urllib.request.Request(query, headers=_HEADERS)
     search_res = bs(urllib.request.urlopen(request), "html.parser")
-    first_res = search_res.find_all("li", {"class": "result first_result"})[0]
-    movie_url_suffix = first_res.find_all("a")[0]['href']
+    results = search_res.find_all("li", {"class": "result"})
+    correct_result = None
+    for result in results:
+        title = result.find_all(
+            "h3", {"class": "product_title"})[0].contents[0].contents[0]
+        title_match = title.strip().lower() == movie_name.strip().lower()
+        if year is None and title_match:
+            correct_result = result
+        else:
+            year_match = str(year) in str(result)
+            if title_match and year_match:
+                correct_result = result
+    movie_url_suffix = correct_result.find_all("a")[0]['href']
     return METACRITIC_URL + movie_url_suffix
 
 
@@ -175,9 +186,9 @@ def _get_user_reviews_props(movie_url):
 
 # === metacritic crawling ===
 
-def get_metacritic_movie_properties(movie_name):
+def get_metacritic_movie_properties(movie_name, year=None):
     """Extracts the properties of a movie profile from Metacritic."""
-    movie_url = _get_movie_url_by_name(movie_name)
+    movie_url = _get_movie_url_by_name(movie_name, year)
     # print(movie_url)
     movie_props = {}
     movie_props.update(_get_critics_reviews_props(movie_url))
@@ -185,7 +196,8 @@ def get_metacritic_movie_properties(movie_name):
     return movie_props
 
 
-def crawl_by_title(movie_name, verbose, parent_pbar=None):
+def crawl_by_title(movie_name, verbose, year=None,
+                   parent_pbar=None):
     """Extracts a movie profile from Metacritic and saves it to disk."""
     def _print(msg):
         if verbose:
@@ -196,15 +208,15 @@ def crawl_by_title(movie_name, verbose, parent_pbar=None):
                 tqdm()
             else:
                 print(msg)
-    if not os.path.exists(METACRITIC_DIR_PATH):
-        os.makedirs(METACRITIC_DIR_PATH)
+    os.makedirs(METACRITIC_DIR_PATH, exist_ok=True)
     file_name = _parse_name_for_file_name(movie_name) + ".json"
     file_path = os.path.join(METACRITIC_DIR_PATH, file_name)
     if os.path.isfile(file_path):
         _print('{} already processed'.format(movie_name))
         return _result.EXIST
     try:
-        props = get_metacritic_movie_properties(movie_name)
+        props = get_metacritic_movie_properties(movie_name, year)
+        props = {'mc_'+key: props[key] for key in props}
         with open(file_path, 'w+') as json_file:
             json.dump(props, json_file, indent=2, sort_keys=True)
         _print("Done saving a profile for {}.".format(movie_name))
@@ -217,7 +229,7 @@ def crawl_by_title(movie_name, verbose, parent_pbar=None):
         # raise exc
 
 
-def crawl_by_file(file_path, verbose=False):
+def crawl_by_file(file_path, verbose, year=None):
     """Crawls Metacritics, building movie profiles for a movies in the given
     file."""
     results = {res_type : 0 for res_type in _result.ALL_TYPES}
@@ -228,7 +240,7 @@ def crawl_by_file(file_path, verbose=False):
     movie_pbar = tqdm(titles, miniters=1, maxinterval=0.0001,
                       mininterval=0.00000000001, total=len(titles))
     for title in movie_pbar:
-        res = crawl_by_title(title, verbose, movie_pbar)
+        res = crawl_by_title(title, verbose, year, movie_pbar)
         results[res] += 1
     print("{} Metacritic movie profiles crawled.")
     for res_type in _result.ALL_TYPES:

@@ -16,22 +16,28 @@ def imdb():
 @imdb.command(help="Crawl IMDB for a specific title.")
 @_shared_options
 @click.argument("title", type=str, nargs=1)
-def bytitle(title, verbose):
+@click.option('--year', default=None, type=int,
+              help="The year the movie came out in.")
+def bytitle(title, verbose, year):
     """Crawl IMDB for a specific title."""
-    holcrawl.imdb_crawl.crawl_by_title(title, verbose)
+    holcrawl.imdb_crawl.crawl_by_title(title, verbose, year)
 
 
 @imdb.command(help="Crawl IMDB for all titles in a text file.")
 @_shared_options
 @click.argument("file_path", type=str, nargs=1)
-def byfile(file_path, verbose):
+@click.option('--year', default=None, type=int,
+              help="The year the movie came out in.")
+def byfile(file_path, verbose, year):
     """Crawl IMDB for all titles in a text file."""
-    holcrawl.imdb_crawl.crawl_by_file(file_path, verbose)
+    holcrawl.imdb_crawl.crawl_by_file(file_path, verbose, year)
 
 
 @imdb.command(help="Crawl IMDB for all titles from a given year.")
 @_shared_options
 @click.argument("year", type=int, nargs=1)
+@click.option('--year', default=None, type=int,
+              help="The year the movie came out in.")
 def byyear(year, verbose):
     """Crawl IMDB for all titles from a given year."""
     holcrawl.compound_cmd.imdb_crawl_by_year(year, verbose)

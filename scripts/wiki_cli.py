@@ -18,4 +18,4 @@ def wiki():
 @click.argument("year", type=int, nargs=1)
 def byyear(year, verbose):
     """Extract title list from Wikipedia by year."""
-    holcrawl.wiki_crawl.generate_title_files(year, verbose)
+    holcrawl.wiki_crawl.generate_title_file(year, verbose)

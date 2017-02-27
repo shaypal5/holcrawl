@@ -53,6 +53,21 @@ def build_united_profiles(verbose):
             json.dump(united_prof, unite_prof_file, indent=2, sort_keys=True)
 
 
+def _num_reviews_by_opening_generator(colname):
+    def _num_reviews_by_opening(row):
+        return len([
+            review for review in row[colname]
+            if review['review_date'] <= row['opening_weekend_date']
+        ])
+    return _num_reviews_by_opening
+
+
+def _avg_review_generator(colname):
+    def _avg_review(row):
+        return np.mean([review['score'] for review in row[colname]])
+    return _avg_review
+
+
 def _avg_review_by_opening_generator(colname):
     def _avg_review_by_opening(row):
         return np.mean([
@@ -81,6 +96,7 @@ def build_csv(verbose):
 
     # flatten some dict or array columns
     df = pd.DataFrame(profiles)
+    df = df[df['opening_weekend_date'].notnull()]
     df = holcrawl.imdb_crawl._decompose_dict_column(
         df, 'avg_rating_per_demo', _DEMOGRAPHICS)
     df = holcrawl.imdb_crawl._decompose_dict_column(
@@ -88,10 +104,41 @@ def build_csv(verbose):
     df = holcrawl.imdb_crawl._decompose_dict_column(
         df, 'rating_freq', [str(i) for i in range(1, 11)])
     df = holcrawl.imdb_crawl._dummy_list_column(df, 'genres')
+
+    df['num_mc_critic'] = df.apply(
+        lambda row: len(row['mc_pro_critic_reviews']), axis=1)
+    df['avg_mc_critic'] = df.apply(
+        _avg_review_generator('mc_pro_critic_reviews'), axis=1)
+    df['num_mc_critic_by_opening'] = df.apply(
+        _num_reviews_by_opening_generator('mc_pro_critic_reviews'), axis=1)
     df['avg_mc_critic_by_opening'] = df.apply(
         _avg_review_by_opening_generator('mc_pro_critic_reviews'), axis=1)
+
+    df['num_mc_user'] = df.apply(
+        lambda row: len(row['mc_user_reviews']), axis=1)
+    df['avg_mc_user'] = df.apply(
+        _avg_review_generator('mc_user_reviews'), axis=1)
+    df['num_mc_user_by_opening'] = df.apply(
+        _num_reviews_by_opening_generator('mc_user_reviews'), axis=1)
     df['avg_mc_user_by_opening'] = df.apply(
         _avg_review_by_opening_generator('mc_user_reviews'), axis=1)
+
+
+    df['num_imdb_user'] = df.apply(
+        lambda row: len(row['imdb_user_reviews']), axis=1)
+    df['avg_imdb_user'] = df.apply(
+        _avg_review_generator('imdb_user_reviews'), axis=1)
+    df['num_imdb_user_by_opening'] = df.apply(
+        _num_reviews_by_opening_generator('imdb_user_reviews'), axis=1)
+    df['avg_imdb_user_by_opening'] = df.apply(
+        _avg_review_by_opening_generator('imdb_user_reviews'), axis=1)
+
+    df['opening_month'] = df['opening_weekend_date'].map(
+        lambda opendate: opendate.month)
+    df['opening_day'] = df['opening_weekend_date'].map(
+        lambda opendate: opendate.day)
+    df['opening_day_of_year'] = df['opening_weekend_date'].map(
+        lambda opendate: opendate.timetuple().tm_yday)
 
     # save to file
     dataset_dir = holcrawl.shared._get_dataset_dir_path()

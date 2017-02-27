@@ -30,6 +30,12 @@ def imdb_crawl_by_year(year, verbose):
     """Crawls IMDB and builds movie profiles for the given year."""
     _crawl_by_year_helper(year, verbose, True, False)
 
+#rerun from 2012 downwards
+def imdb_crawl_by_years(years, verbose):
+    """Crawls IMDB and builds movie profiles for the given years."""
+    for year in years:
+        imdb_crawl_by_year(year, verbose)
+
 
 def metacritic_crawl_by_year(year, verbose):
     """Crawls Metacritic and builds movie profiles for the given year."""
@@ -39,3 +45,9 @@ def metacritic_crawl_by_year(year, verbose):
 def crawl_all_by_year(year, verbose):
     """Crawls all sources and builds movie profiles for the given year."""
     _crawl_by_year_helper(year, verbose, True, True)
+
+
+def crawl_all_by_years(years, verbose):
+    """Crawls all sources and builds movie profiles for the given years."""
+    for year in years:
+        crawl_all_by_year(year, verbose)

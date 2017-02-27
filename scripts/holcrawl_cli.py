@@ -39,12 +39,12 @@ def byfile(file_path, verbose):
     holcrawl.compound_cmd.crawl_all_by_file(file_path, verbose)
 
 
-@cli.command(help="Crawl all sources for titles in a given year.")
+@cli.command(help="Crawl all sources for titles in the given years.")
 @_shared_options
-@click.argument("year", type=int, nargs=1)
-def byyear(year, verbose):
-    """Crawl all sources for titles in a given year."""
-    holcrawl.compound_cmd.crawl_all_by_year(year, verbose)
+@click.argument("years", type=int, nargs=-1)
+def byyears(years, verbose):
+    """Crawl all sources for titles in the given years."""
+    holcrawl.compound_cmd.crawl_all_by_years(years, verbose)
 
 
 @cli.command(help="Sets a directory as the data directory.")

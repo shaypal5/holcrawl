@@ -125,7 +125,7 @@ def _parse_string(string):
     return string.lower().strip().replace(' ', '_')
 
 
-_CHARS_TO_REMOVE = r"[\:\;,\.'/\!]"
+_CHARS_TO_REMOVE = r"[\:\;,\.'/\!\?]"
 
 def _parse_name_for_file_name(movie_name):
     parsed = re.sub(_CHARS_TO_REMOVE, '', movie_name)

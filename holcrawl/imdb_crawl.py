@@ -219,7 +219,11 @@ def _get_business_props(movie_code):
         int(match.replace(',', ''))
         for match in re.findall(_US_OPEN_WEEKEND_REGEX, weekend_contents)]
     busi_props = {}
+    busi_props['screens_by_weekend'] = [
+        val for val in reversed(num_screens_list)]
+    busi_props['opening_weekend_screens'] = busi_props['screens_by_weekend'][0]
     busi_props['max_screens'] = max(num_screens_list)
+    busi_props['total_screens'] = sum(num_screens_list)
     busi_props['avg_screens'] = sum(num_screens_list) / len(num_screens_list)
     busi_props['num_weekends'] = len(num_screens_list)
     return busi_props
@@ -251,6 +255,36 @@ def _get_release_props(movie_code):
             release_props['release_month'] = release[1]
             release_props['release_year'] = int(release[2])
     return release_props
+
+
+# ==== crawling the user reviews page ====
+
+_REVIEWS_URL = ('http://www.imdb.com/title/{code}/'
+                'reviews-index?start=0;count=9999')
+_USER_REVIEW_RATING_REGEX = r"alt=\"(\d|10)/10"
+
+def _get_reviews_props(movie_code):
+    cur_reviews_url = _REVIEWS_URL.format(code=movie_code)
+    reviews_page = bs(urllib.request.urlopen(cur_reviews_url), "html.parser")
+    reviews = reviews_page.find_all("td", {"class": "comment-summary"})
+    user_reviews = []
+    for review in reviews:
+        try:
+            rating = int(re.findall(_USER_REVIEW_RATING_REGEX, str(review))[0])
+            date_str = re.findall(
+                r"on (\d{1,2} [a-zA-Z]+ \d{4})", str(review))[0]
+            date = datetime.strptime(date_str, "%d %B %Y").date()
+            contents = review.find_all(
+                'a', href=re.compile(r'reviews.+?'))[0].contents[0]
+            user = review.find_all(
+                'a', href=re.compile(r'/user/.+?'))[1].contents[0]
+            user_reviews.append({
+                'score': rating, 'review_date': date,
+                'contents': contents, 'user': user
+            })
+        except Exception:  # pylint: disable=W0703
+            pass
+    return {'imdb_user_reviews': user_reviews}
 
 
 # ==== crawling a movie profile ====
@@ -304,6 +338,7 @@ def crawl_movie_profile(movie_name, year=None):
     props.update(_get_rating_props(movie_code))
     props.update(_get_business_props(movie_code))
     props.update(_get_release_props(movie_code))
+    props.update(_get_reviews_props(movie_code))
     return props
 
 
@@ -358,11 +393,9 @@ def crawl_by_file(file_path, verbose, year=None):
     for title in movie_pbar:
         res = crawl_by_title(title, verbose, year, movie_pbar)
         results[res] += 1
-    print("{} IMDB movie profiles crawled.")
+    print("{} IMDB movie profiles crawled.".format(len(titles)))
     for res_type in _result.ALL_TYPES:
         print('{} {}.'.format(results[res_type], res_type))
-
-
 
 
 # === uniting movie profiles to csv ===

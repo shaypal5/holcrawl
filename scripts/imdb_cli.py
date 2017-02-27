@@ -36,11 +36,17 @@ def byfile(file_path, verbose, year):
 @imdb.command(help="Crawl IMDB for all titles from a given year.")
 @_shared_options
 @click.argument("year", type=int, nargs=1)
-@click.option('--year', default=None, type=int,
-              help="The year the movie came out in.")
 def byyear(year, verbose):
     """Crawl IMDB for all titles from a given year."""
     holcrawl.compound_cmd.imdb_crawl_by_year(year, verbose)
+
+
+@imdb.command(help="Crawl IMDB for all titles from given years.")
+@_shared_options
+@click.argument("years", type=int, nargs=-1)
+def byyears(years, verbose):
+    """Crawl IMDB for all titles from given years."""
+    holcrawl.compound_cmd.imdb_crawl_by_years(years, verbose)
 
 
 @imdb.command(help="Unite all profiles in the IMDB directory.")

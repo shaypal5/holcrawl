@@ -27,6 +27,7 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     long_description=README,
+    license="MIT",
     url='https://github.com/shaypal5/holcrawl',
     packages=find_packages(),
     include_package_data=True,

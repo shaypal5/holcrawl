@@ -38,4 +38,8 @@ to get help about the different commands ``holcrawl`` supports.
 
 Credits
 =======
-Created by Shay Palachy  (shay.palachy@gmail.com).
+Created by `Shay Palachy <https://github.com/shaypal5>`_  (shay.palachy@gmail.com).
+
+Fixes submitted by:
+
+- `gilgemer <https://github.com/gilgemer>`_

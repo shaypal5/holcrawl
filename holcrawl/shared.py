@@ -72,7 +72,6 @@ def _get_wiki_dir_path():
 
 
 def _get_wiki_list_file_path(year):
-    import pdb; pdb.set_trace()
     if not os.path.exists(_get_wiki_dir_path()):
         os.makedirs(_get_wiki_dir_path())
     return os.path.join(_get_wiki_dir_path(), '{}_titles.txt'.format(year))
